@@ -1928,52 +1928,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 24),
 
-                // Test Accounts Info
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Test Accounts:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        '👤 Consumer: consumer@test.com',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                      const Text(
-                        '🔧 Technician: technician@test.com',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                      const Text(
-                        '⚙️ Admin: admin@test.com',
-                        style: TextStyle(fontSize: 11),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Password: password123',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontStyle: FontStyle.italic,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
                 // Login Button
                 SizedBox(
                   width: double.infinity,
