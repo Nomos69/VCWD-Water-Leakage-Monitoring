@@ -2,28 +2,6 @@
 
 A smart water management system for Valencia City, Bukidnon with real-time sensor monitoring, role-based dashboards, and water issue reporting.
 
-## Features
-
-✨ **Authentication System**
-- User registration with email and password
-- Login with role-based access control
-- Three user roles: Consumer, Technician, Admin
-
-📊 **Role-Based Dashboards**
-- **Consumer Dashboard**: Report water issues, track service requests
-- **Technician Dashboard**: View and manage pending tasks
-- **Admin Dashboard**: Monitor sensors, manage system, view analytics
-
-🗺️ **Interactive Map**
-- Valencia City water sensor map
-- Real-time sensor status visualization (Green = Active, Red = Inactive)
-- Tap sensors for detailed information
-- Flow rate monitoring
-
-🔌 **ESP32 WebSocket Integration**
-- Real-time sensor data streaming
-- Fallback to data simulation when offline
-- Support for multiple sensors
 
 ## Prerequisites
 
@@ -198,11 +176,6 @@ S001:12.5
 
 ## Offline Functionality
 
-The app works completely offline:
-- ✅ Login/registration (local storage)
-- ✅ Dashboard access
-- ✅ Sensor data simulation when ESP32 unavailable
-- ✅ All features except real ESP32 data
 
 When ESP32 is unavailable, the app automatically switches to simulated sensor data.
 
@@ -259,16 +232,6 @@ start ms-settings:developers
 # Enable "Developer Mode"
 ```
 
-## Platform Support
-
-| Platform | Status |
-|----------|--------|
-| Web (Chrome) | ✅ Fully Supported |
-| Android | ✅ Fully Supported |
-| iOS | ✅ Fully Supported |
-| Windows | ✅ Fully Supported |
-| macOS | ✅ Supported |
-| Linux | ✅ Supported |
 
 ## Database
 
@@ -307,13 +270,6 @@ Future<bool> login(String email, String password) async {
 }
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## File Structure
 
