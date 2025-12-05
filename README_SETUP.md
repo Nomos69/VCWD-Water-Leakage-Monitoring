@@ -344,36 +344,4 @@ lib/main.dart (All code in one file):
 │
 └── Utilities
     └── Helpers (Dialog, Colors, etc.)
-```
 
-## Future Enhancements
-
-- 🔐 Backend authentication with JWT
-- 💾 SQLite database for persistence
-- 📍 Real GPS integration
-- 📱 Push notifications
-- 📈 Analytics dashboard
-- 🔔 Alert system for anomalies
-- 🗺️ Multiple city support
-- 🌐 API integration
-
-## License
-
-This project is created for Human-Computer Interaction course at CMU.
-
-## Support
-
-For issues or questions:
-1. Check the Flutter documentation: https://flutter.dev/docs
-2. Review the code comments in `main.dart`
-3. Refer to package documentation on pub.dev
-
-## Contact
-
-Created for: Human Computer Interaction 1 - CMU
-Course: Third Year, First Semester
-
----
-
-**Last Updated**: December 5, 2025
-**Version**: 1.0.0
