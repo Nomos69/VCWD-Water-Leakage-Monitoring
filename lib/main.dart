@@ -2774,6 +2774,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     ),
   ];
 
+  // Reports list
+  List<ConsumerReport> reports = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -3155,44 +3158,374 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Management',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          // Header with Add Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Water Reports',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: _showCreateReportDialog,
+                icon: const Icon(Icons.add),
+                label: const Text('New Report'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Reports List
+          if (reports.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(24),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade700),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.inbox,
+                    size: 48,
+                    color: Colors.grey.shade700,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No reports yet. Create one to get started!',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            )
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: reports.length,
+              itemBuilder: (context, index) {
+                final report = reports[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    report.consumerName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    report.type.toString().split('.').last.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: report.type == ReportType.leakage
+                                          ? Colors.red
+                                          : Colors.orange,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: _getStatusColor(report.status)
+                                    .withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                report.status
+                                    .toString()
+                                    .split('.')
+                                    .last
+                                    .toUpperCase(),
+                                style: TextStyle(
+                                  color: _getStatusColor(report.status),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Details
+                        Text(
+                          report.description,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Contact Info
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '📍 ${report.address}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '📞 ${report.contactNumber}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Actions
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            TextButton.icon(
+                              onPressed: () => _updateReportStatus(
+                                  index, ReportStatus.inProgress),
+                              icon: const Icon(Icons.build),
+                              label: const Text('In Progress'),
+                            ),
+                            TextButton.icon(
+                              onPressed: () => _updateReportStatus(
+                                  index, ReportStatus.resolved),
+                              icon: const Icon(Icons.check_circle),
+                              label: const Text('Resolve'),
+                            ),
+                            TextButton.icon(
+                              onPressed: () => _deleteReport(index),
+                              icon: const Icon(Icons.delete),
+                              label: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
+        ],
+      ),
+    );
+  }
+
+  void _showCreateReportDialog() {
+    final consumerNameCtrl = TextEditingController();
+    final contactCtrl = TextEditingController();
+    final addressCtrl = TextEditingController();
+    final barangayCtrl = TextEditingController();
+    final descriptionCtrl = TextEditingController();
+    ReportType selectedType = ReportType.lowPressure;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Create New Report'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: consumerNameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Consumer Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: contactCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Contact Number',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: addressCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Address',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: barangayCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Barangay',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<ReportType>(
+                value: selectedType,
+                decoration: const InputDecoration(
+                  labelText: 'Report Type',
+                  border: OutlineInputBorder(),
+                ),
+                items: ReportType.values.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type.toString().split('.').last),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) selectedType = value;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descriptionCtrl,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          _buildManagementOption(
-            'Users',
-            'Manage user accounts and roles',
-            Icons.people,
-            Colors.blue,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
-          const SizedBox(height: 12),
-          _buildManagementOption(
-            'Sensors',
-            'Monitor and configure sensors',
-            Icons.sensors,
-            Colors.green,
-          ),
-          const SizedBox(height: 12),
-          _buildManagementOption(
-            'Reports',
-            'View and manage all reports',
-            Icons.assessment,
-            Colors.orange,
-          ),
-          const SizedBox(height: 12),
-          _buildManagementOption(
-            'System Settings',
-            'Configure system parameters',
-            Icons.settings,
-            Colors.purple,
+          ElevatedButton(
+            onPressed: () {
+              if (consumerNameCtrl.text.isEmpty ||
+                  contactCtrl.text.isEmpty ||
+                  addressCtrl.text.isEmpty ||
+                  descriptionCtrl.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please fill all fields'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              setState(() {
+                reports.add(
+                  ConsumerReport(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    consumerName: consumerNameCtrl.text,
+                    contactNumber: contactCtrl.text,
+                    address: addressCtrl.text,
+                    barangay: barangayCtrl.text,
+                    type: selectedType,
+                    description: descriptionCtrl.text,
+                    reportedAt: DateTime.now(),
+                    latitude: 7.9042,
+                    longitude: 125.0928,
+                  ),
+                );
+              });
+
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Report created successfully'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: const Text('Create'),
           ),
         ],
       ),
     );
+  }
+
+  void _updateReportStatus(int index, ReportStatus status) {
+    setState(() {
+      reports[index].status = status;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Report marked as ${status.toString().split('.').last}'),
+        backgroundColor: Colors.blue,
+      ),
+    );
+  }
+
+  void _deleteReport(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Report'),
+        content: const Text('Are you sure you want to delete this report?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                reports.removeAt(index);
+              });
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Report deleted'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            },
+            child: const Text('Delete'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(ReportStatus status) {
+    switch (status) {
+      case ReportStatus.pending:
+        return Colors.orange;
+      case ReportStatus.inProgress:
+        return Colors.blue;
+      case ReportStatus.resolved:
+        return Colors.green;
+    }
   }
 
   Widget _buildStatCard(String label, String value, Color color) {
@@ -3219,68 +3552,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildManagementOption(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-  ) {
-    return GestureDetector(
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$title feature coming soon!'),
-          ),
-        );
-      },
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right),
-            ],
-          ),
         ),
       ),
     );
